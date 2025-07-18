@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IVulnerableBank {
+interface IVictimBank {
     function deposit() external payable;
     function withdraw() external;
 }
 
 contract ReentrancyAttacker {
     address private immutable owner;
-    IVulnerableBank private immutable victimContract;
+    IVictimBank private immutable victimContract;
 
     constructor(address _victim) {
         owner = msg.sender;
