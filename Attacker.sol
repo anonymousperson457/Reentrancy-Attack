@@ -12,7 +12,7 @@ contract ReentrancyAttacker {
 
     constructor(address _victim) {
         owner = msg.sender;
-        victimContract = IVulnerableBank(_victim);
+        victimContract = IVictimBank(_victim);
     }
 
     function attack() external payable {
