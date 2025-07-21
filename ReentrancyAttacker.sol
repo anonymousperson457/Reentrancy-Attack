@@ -17,6 +17,7 @@ contract ReentrancyAttacker {
 
     function feed() external payable {
         require(msg.sender == owner, "Not owner");
+        require(msg.value > 0, "No EVM_Cyptro Sent");
         victimContract.deposit{value: msg.value}();
     }
 
